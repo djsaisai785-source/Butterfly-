@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, CheckCircle, XCircle, Clock, Star } from "lucide-react";
+import { Calendar, CheckCircle, XCircle, Clock, Star, X } from "lucide-react";
 import { authClient } from "../lib/auth";
 import { getToken } from "../lib/auth";
 import { useToast } from "../components/Toast";
+import { useState } from "react";
 
 const API = import.meta.env.VITE_SERVER_URL || "";
 
@@ -32,6 +33,32 @@ export default function ReservationsPage() {
   const userId = session?.user?.id;
   const queryClient = useQueryClient();
   const { success, error } = useToast();
+  const [reviewModal, setReviewModal] = useState<{ reservationId: string; reviewedId: string; listingId: string; title: string } | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+
+  const reviewMutation = useMutation({
+    mutationFn: async ({ reservationId, reviewedId, listingId }: { reservationId: string; reviewedId: string; listingId: string }) => {
+      return apiFetch("/api/reviews", {
+        method: "POST",
+        body: JSON.stringify({
+          listingId,
+          reviewerId: userId,
+          reviewedId,
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+    },
+    onSuccess: () => {
+      success("Avis publié !");
+      setReviewModal(null);
+      setReviewComment("");
+      setReviewRating(5);
+      queryClient.invalidateQueries({ queryKey: ["reservations", userId] });
+    },
+    onError: () => error("Erreur lors de la publication de l'avis."),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["reservations", userId],
@@ -199,12 +226,19 @@ export default function ReservationsPage() {
                   )}
 
                   {r.status === "completed" && (
-                    <button style={{
-                      background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.2)",
-                      color: "#D4AF37", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                      fontSize: 13, fontFamily: "inherit",
-                      display: "flex", alignItems: "center", gap: 6,
-                    }}>
+                    <button
+                      onClick={() => setReviewModal({
+                        reservationId: r.id,
+                        reviewedId: isSeller ? (r.buyer?.id || r.buyerId) : (r.seller?.id || r.sellerId),
+                        listingId: r.listingId,
+                        title: title,
+                      })}
+                      style={{
+                        background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.2)",
+                        color: "#D4AF37", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
+                        fontSize: 13, fontFamily: "inherit",
+                        display: "flex", alignItems: "center", gap: 6,
+                      }}>
                       <Star size={14} /> Laisser un avis
                     </button>
                   )}
@@ -214,6 +248,79 @@ export default function ReservationsPage() {
           })}
         </div>
       </div>
+
+      {/* Review modal */}
+      {reviewModal && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 500,
+          background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+        }} onClick={() => setReviewModal(null)}>
+          <div style={{
+            background: "#10101C", border: "1px solid rgba(212,175,55,0.25)",
+            borderRadius: 20, padding: 32, maxWidth: 480, width: "100%",
+            boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, color: "#F5F5F0", margin: 0 }}>
+                Laisser un avis
+              </h2>
+              <button onClick={() => setReviewModal(null)} style={{
+                background: "transparent", border: "none", cursor: "pointer", color: "#8A8A9A",
+              }}><X size={20} /></button>
+            </div>
+
+            <p style={{ color: "#8A8A9A", fontSize: 14, marginBottom: 20 }}>
+              {reviewModal.title}
+            </p>
+
+            {/* Stars */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 13, color: "#8A8A9A", display: "block", marginBottom: 10 }}>Note</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[1,2,3,4,5].map(n => (
+                  <button key={n} onClick={() => setReviewRating(n)} style={{
+                    background: "transparent", border: "none", cursor: "pointer",
+                    fontSize: 28, padding: 0,
+                    filter: n <= reviewRating ? "none" : "grayscale(1) opacity(0.4)",
+                    transform: n <= reviewRating ? "scale(1.1)" : "scale(1)",
+                    transition: "all 0.15s",
+                  }}>★</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Comment */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ fontSize: 13, color: "#8A8A9A", display: "block", marginBottom: 8 }}>Commentaire (optionnel)</label>
+              <textarea
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                placeholder="Partagez votre expérience..."
+                rows={4}
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  background: "rgba(26,26,38,0.8)", border: "1px solid rgba(42,42,58,0.8)",
+                  borderRadius: 12, padding: "12px 16px",
+                  color: "#F5F5F0", fontSize: 14, fontFamily: "inherit",
+                  outline: "none", resize: "vertical",
+                }} />
+            </div>
+
+            <button
+              onClick={() => reviewMutation.mutate(reviewModal)}
+              disabled={reviewMutation.isPending}
+              style={{
+                width: "100%", background: "linear-gradient(135deg, #D4AF37, #FFBF00)",
+                color: "#0A0A0F", border: "none", borderRadius: 12, padding: "14px",
+                fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                opacity: reviewMutation.isPending ? 0.6 : 1,
+              }}>
+              {reviewMutation.isPending ? "Publication..." : "Publier l'avis"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

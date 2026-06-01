@@ -10,6 +10,7 @@ import ReservationsPage from "./pages/reservations";
 import SignInPage from "./pages/sign-in";
 import SignUpPage from "./pages/sign-up";
 import FamillePage from "./pages/famille";
+import NotFoundPage from "./pages/not-found";
 import { authClient } from "./lib/auth";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ export default function App() {
             <ProtectedRoute><ReservationsPage /></ProtectedRoute>
           </Route>
           <Route path="/famille" component={FamillePage} />
+          <Route component={NotFoundPage} />
         </Switch>
       </Route>
     </Switch>

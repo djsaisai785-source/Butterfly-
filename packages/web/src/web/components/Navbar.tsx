@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Search, PlusCircle, MessageCircle, User, LogOut, LogIn } from "lucide-react";
-import { authClient, clearToken } from "../lib/auth";
-import { useState } from "react";
+import { authClient, clearToken, getToken } from "../lib/auth";
+import { useState, useEffect } from "react";
 
 const C = {
   gold: "#D4AF37",
@@ -17,6 +17,29 @@ export default function Navbar() {
   const { data: session } = authClient.useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const fetchUnread = async () => {
+      try {
+        const token = getToken();
+        const res = await fetch(`/api/conversations?userId=${session.user.id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        const convos: any[] = data.conversations || [];
+        // Count conversations with unread messages (lastMessage unread + not sent by me)
+        const count = convos.filter((c: any) =>
+          c.lastMessage && !c.lastMessage.read && c.lastMessage.senderId !== session.user.id
+        ).length;
+        setUnreadCount(count);
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => clearInterval(interval);
+  }, [session?.user?.id, location]);
 
   async function handleSignOut() {
     await authClient.signOut();
@@ -116,8 +139,19 @@ export default function Navbar() {
                 border: "1px solid transparent",
                 color: location === "/messages" ? C.gold : C.muted,
                 padding: "8px", borderRadius: 8, cursor: "pointer",
+                position: "relative",
               }}>
                 <MessageCircle size={20} />
+                {unreadCount > 0 && (
+                  <span style={{
+                    position: "absolute", top: 2, right: 2,
+                    background: "#E74C3C", color: "#fff",
+                    borderRadius: "50%", width: 16, height: 16,
+                    fontSize: 10, fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    lineHeight: 1,
+                  }}>{unreadCount > 9 ? "9+" : unreadCount}</span>
+                )}
               </button>
             </Link>
           </>

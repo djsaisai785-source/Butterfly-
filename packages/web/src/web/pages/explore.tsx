@@ -109,7 +109,7 @@ export default function ExplorePage() {
         {listings.isLoading ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
             {[...Array(9)].map((_, i) => (
-              <div key={i} style={{ height: 300, background: "rgba(26,26,38,0.5)", borderRadius: 16 }} />
+              <div key={i} className="skeleton" style={{ height: 300, borderRadius: 16 }} />
             ))}
           </div>
         ) : filtered.length === 0 ? (

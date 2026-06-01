@@ -203,12 +203,16 @@ const app = new Hono()
     const convos = await db.select().from(schema.conversations)
       .where(or(eq(schema.conversations.participant1Id, userId), eq(schema.conversations.participant2Id, userId)))
       .orderBy(desc(schema.conversations.lastMessageAt));
-    // Enrich with participants + listing
+    // Enrich with participants + listing + lastMessage
     const enriched = await Promise.all(convos.map(async (c) => {
       const [p1] = await db.select({ id: schema.users.id, name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, c.participant1Id));
       const [p2] = await db.select({ id: schema.users.id, name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, c.participant2Id));
       const listing = c.listingId ? (await db.select({ id: schema.listings.id, title: schema.listings.title }).from(schema.listings).where(eq(schema.listings.id, c.listingId)))[0] ?? null : null;
-      return { ...c, participant1: p1 ?? null, participant2: p2 ?? null, listing: listing ?? null };
+      const [lastMsg] = await db.select().from(schema.messages)
+        .where(eq(schema.messages.conversationId, c.id))
+        .orderBy(desc(schema.messages.createdAt))
+        .limit(1);
+      return { ...c, participant1: p1 ?? null, participant2: p2 ?? null, listing: listing ?? null, lastMessage: lastMsg ?? null };
     }));
     return c.json({ conversations: enriched }, 200);
   })

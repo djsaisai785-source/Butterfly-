@@ -37,7 +37,7 @@ export default function Navbar() {
       <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
         <img src="/logo.png" alt="AURA" style={{ width: 36, height: 36, objectFit: "contain" }} onError={e => (e.currentTarget.style.display = "none")} />
         <span style={{
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Syne', sans-serif",
           fontSize: "20px", fontWeight: 700,
           background: "linear-gradient(135deg, #D4AF37, #FFBF00)",
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
@@ -59,7 +59,7 @@ export default function Navbar() {
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "#F5F5F0", fontSize: "14px", width: "100%",
-            fontFamily: "'Poppins', sans-serif",
+            
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -78,7 +78,7 @@ export default function Navbar() {
             border: location === "/explore" ? "1px solid rgba(212,175,55,0.3)" : "1px solid transparent",
             color: location === "/explore" ? C.gold : C.muted,
             padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-            fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+             fontSize: "14px",
           }}>Explorer</button>
         </Link>
 
@@ -89,7 +89,7 @@ export default function Navbar() {
             border: location === "/famille" ? "1px solid rgba(79,195,247,0.3)" : "1px solid transparent",
             color: location === "/famille" ? C.kido : C.muted,
             padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-            fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+             fontSize: "14px",
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <span>👨‍👩‍👧</span> Famille
@@ -103,7 +103,7 @@ export default function Navbar() {
                 background: "linear-gradient(135deg, #D4AF37, #FFBF00)",
                 color: "#0A0A0F", border: "none",
                 padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                fontFamily: "'Poppins', sans-serif", fontSize: "14px", fontWeight: 600,
+                 fontSize: "14px", fontWeight: 600,
                 display: "flex", alignItems: "center", gap: "6px",
               }}>
                 <PlusCircle size={16} /> Poster

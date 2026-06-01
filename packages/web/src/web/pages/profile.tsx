@@ -82,7 +82,7 @@ export default function ProfilePage() {
           <div>
             <div style={{ marginBottom: 32 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: C.text, margin: 0 }}>
+                <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 32, color: C.text, margin: 0 }}>
                   {user.name}
                 </h1>
                 <span style={{
@@ -103,7 +103,7 @@ export default function ProfilePage() {
                   background: C.surface, border: `1px solid ${C.border}`,
                   borderRadius: 14, padding: "16px 24px", textAlign: "center",
                 }}>
-                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: C.gold }}>{s.value}</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, color: C.gold }}>{s.value}</div>
                   <div style={{ fontSize: 12, color: C.muted }}>{s.label}</div>
                 </div>
               ))}
@@ -112,7 +112,7 @@ export default function ProfilePage() {
             {/* My listings */}
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: C.text, margin: 0 }}>
+                <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, color: C.text, margin: 0 }}>
                   Mes annonces
                 </h2>
                 <Link to="/post">
@@ -160,7 +160,7 @@ export default function ProfilePage() {
               background: C.surface, border: "1px solid rgba(212,175,55,0.2)",
               borderRadius: 20, padding: 24,
             }}>
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: C.text, margin: "0 0 20px" }}>
+              <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, color: C.text, margin: "0 0 20px" }}>
                 Abonnement
               </h3>
 

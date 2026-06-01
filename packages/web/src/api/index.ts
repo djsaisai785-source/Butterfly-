@@ -57,7 +57,19 @@ const app = new Hono()
   // ─── LISTINGS ───
   .get("/listings", async (c) => {
     const { category, type, location, q } = c.req.query();
-    let query = db.select({
+
+    const conditions = [eq(schema.listings.status, "active")];
+    if (category) conditions.push(eq(schema.listings.category, category));
+    if (type) conditions.push(eq(schema.listings.type, type));
+    if (location) conditions.push(like(schema.listings.location, `%${location}%`));
+    if (q) conditions.push(
+      or(
+        like(schema.listings.title, `%${q}%`),
+        like(schema.listings.description, `%${q}%`),
+      )!
+    );
+
+    const listings = await db.select({
       listing: schema.listings,
       user: {
         id: schema.users.id,
@@ -69,11 +81,10 @@ const app = new Hono()
     })
     .from(schema.listings)
     .leftJoin(schema.users, eq(schema.listings.userId, schema.users.id))
-    .where(eq(schema.listings.status, "active"))
+    .where(and(...conditions))
     .orderBy(desc(schema.listings.createdAt))
     .limit(50);
 
-    const listings = await query;
     return c.json({ listings }, 200);
   })
   .get("/listings/:id", async (c) => {

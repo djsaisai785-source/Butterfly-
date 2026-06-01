@@ -16,6 +16,7 @@ export default function Navbar() {
   const [location, navigate] = useLocation();
   const { data: session } = authClient.useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState("");
 
   async function handleSignOut() {
     await authClient.signOut();
@@ -53,13 +54,18 @@ export default function Navbar() {
         <Search size={16} color={C.muted} />
         <input
           placeholder="Chercher DJ, nounou, chauffeur, table VIP..."
+          value={searchVal}
+          onChange={e => setSearchVal(e.target.value)}
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "#F5F5F0", fontSize: "14px", width: "100%",
             fontFamily: "'Poppins', sans-serif",
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter") navigate("/explore");
+            if (e.key === "Enter") {
+              navigate(searchVal.trim() ? `/explore?q=${encodeURIComponent(searchVal.trim())}` : "/explore");
+              setSearchVal("");
+            }
           }}
         />
       </div>

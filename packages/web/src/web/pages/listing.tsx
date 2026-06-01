@@ -117,7 +117,7 @@ export default function ListingPage() {
 
   if (isLoading) return (
     <div style={{ paddingTop: 80, display: "flex", justifyContent: "center", alignItems: "center", height: "80vh", background: "var(--bg-primary)" }}>
-      <div style={{ color: "#D4AF37", fontSize: 32 }}>🦋</div>
+      <div style={{ color: "#D4AF37", fontSize: 32, letterSpacing: 4, fontWeight: 900 }}>AURA</div>
     </div>
   );
 

@@ -1,25 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { CATEGORIES } from "../lib/categories";
 import ListingCard from "../components/ListingCard";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Search } from "lucide-react";
 
 export default function ExplorePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [searchQ, setSearchQ] = useState("");
+
+  // Lire les query params URL (ex: /explore?category=famille&q=nounou)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    const type = params.get("type");
+    const q = params.get("q");
+    if (cat) setSelectedCategory(cat);
+    if (type) setSelectedType(type);
+    if (q) setSearchQ(q);
+  }, []);
 
   const listings = useQuery({
-    queryKey: ["listings"],
-    queryFn: async () => (await api.listings.$get()).json(),
+    queryKey: ["listings", selectedCategory, selectedType, searchQ],
+    queryFn: async () => {
+      const query: Record<string, string> = {};
+      if (selectedCategory) query.category = selectedCategory;
+      if (selectedType) query.type = selectedType;
+      if (searchQ) query.q = searchQ;
+      return (await api.listings.$get({ query })).json();
+    },
   });
 
-  const allListings = (listings.data?.listings || []) as any[];
-  const filtered = allListings.filter((row: any) => {
-    if (selectedCategory && row.listing.category !== selectedCategory) return false;
-    if (selectedType && row.listing.type !== selectedType) return false;
-    return true;
-  });
+  const filtered = (listings.data?.listings || []) as any[];
 
   return (
     <div style={{ paddingTop: 80, minHeight: "100vh", background: "var(--bg-primary)" }}>
@@ -33,6 +46,22 @@ export default function ExplorePage() {
           <p style={{ color: "#8A8A9A" }}>
             {filtered.length} annonce{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
           </p>
+        </div>
+
+        {/* Search */}
+        <div style={{ marginBottom: 24, position: "relative" }}>
+          <Search size={16} color="#8A8A9A" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }} />
+          <input
+            value={searchQ}
+            onChange={e => setSearchQ(e.target.value)}
+            placeholder="Chercher DJ, nounou, table VIP, atelier..."
+            style={{
+              width: "100%", padding: "12px 16px 12px 44px",
+              borderRadius: 12, boxSizing: "border-box",
+              background: "rgba(26,26,38,0.8)", border: "1px solid rgba(42,42,58,0.8)",
+              color: "#F5F5F0", fontSize: 15, fontFamily: "inherit", outline: "none",
+            }}
+          />
         </div>
 
         {/* Filters */}

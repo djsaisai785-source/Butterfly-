@@ -116,8 +116,19 @@ export default function ListingPage() {
   }
 
   if (isLoading) return (
-    <div style={{ paddingTop: 80, display: "flex", justifyContent: "center", alignItems: "center", height: "80vh", background: "var(--bg-primary)" }}>
-      <div style={{ color: "#D4AF37", fontSize: 32, letterSpacing: 4, fontWeight: 900 }}>AURA</div>
+    <div style={{ paddingTop: 80, minHeight: "100vh", background: "var(--bg-primary)", padding: "80px 24px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 360px", gap: 40 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="skeleton" style={{ height: 40, width: "70%", borderRadius: 8 }} />
+          <div className="skeleton" style={{ height: 20, width: "40%", borderRadius: 8 }} />
+          <div className="skeleton" style={{ height: 160, borderRadius: 16 }} />
+          <div className="skeleton" style={{ height: 20, width: "60%", borderRadius: 8 }} />
+          <div className="skeleton" style={{ height: 20, width: "80%", borderRadius: 8 }} />
+        </div>
+        <div>
+          <div className="skeleton" style={{ height: 320, borderRadius: 20 }} />
+        </div>
+      </div>
     </div>
   );
 
@@ -139,7 +150,7 @@ export default function ListingPage() {
         <button onClick={() => navigate("/explore")} style={{
           display: "flex", alignItems: "center", gap: 8, background: "transparent",
           border: "none", color: "#8A8A9A", cursor: "pointer", fontSize: 14,
-          fontFamily: "'Poppins', sans-serif", marginBottom: 32,
+          fontFamily: "inherit", marginBottom: 32,
         }}>
           <ArrowLeft size={16} /> Retour aux annonces
         </button>
@@ -167,7 +178,7 @@ export default function ListingPage() {
               )}
             </div>
 
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: "#F5F5F0", lineHeight: 1.2, marginBottom: 16 }}>
+            <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 36, color: "#F5F5F0", lineHeight: 1.2, marginBottom: 16 }}>
               {listing.title}
             </h1>
 
@@ -181,7 +192,7 @@ export default function ListingPage() {
               background: "rgba(26,26,38,0.8)", border: "1px solid rgba(42,42,58,0.8)",
               borderRadius: 16, padding: 28, marginBottom: 24,
             }}>
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#F5F5F0", marginBottom: 12 }}>Description</h3>
+              <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, color: "#F5F5F0", marginBottom: 12 }}>Description</h3>
               <p style={{ color: "#C0C0C8", lineHeight: 1.8, fontSize: 15 }}>{listing.description}</p>
             </div>
 
@@ -216,13 +227,13 @@ export default function ListingPage() {
               <div style={{ marginBottom: 20 }}>
                 {listing.price ? (
                   <>
-                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 700, color: "#D4AF37" }}>
+                    <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, fontWeight: 700, color: "#D4AF37" }}>
                       {listing.price}€
                     </span>
                     <span style={{ color: "#8A8A9A", fontSize: 15 }}> / {listing.priceUnit}</span>
                   </>
                 ) : (
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: "#D4AF37" }}>Sur devis</span>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 24, color: "#D4AF37" }}>Sur devis</span>
                 )}
               </div>
 

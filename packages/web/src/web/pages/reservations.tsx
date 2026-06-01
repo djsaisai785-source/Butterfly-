@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Calendar, CheckCircle, XCircle, Clock, Star } from "lucide-react";
 import { authClient } from "../lib/auth";
 import { getToken } from "../lib/auth";
+import { useToast } from "../components/Toast";
 
 const API = import.meta.env.VITE_SERVER_URL || "";
 
@@ -30,6 +31,7 @@ export default function ReservationsPage() {
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
   const queryClient = useQueryClient();
+  const { success, error } = useToast();
 
   const { data, isLoading } = useQuery({
     queryKey: ["reservations", userId],
@@ -45,7 +47,13 @@ export default function ReservationsPage() {
         method: "PUT",
         body: JSON.stringify({ status }),
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["reservations", userId] }),
+    onSuccess: (_data: any, vars: { id: string; status: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["reservations", userId] });
+      if (vars.status === "confirmed") success("Réservation confirmée !");
+      else if (vars.status === "cancelled") success("Réservation annulée.");
+      else success("Statut mis à jour.");
+    },
+    onError: () => error("Erreur lors de la mise à jour."),
   });
 
   const counts = {
@@ -66,7 +74,7 @@ export default function ReservationsPage() {
     <div style={{ paddingTop: 64, minHeight: "100vh", background: "var(--bg-primary)" }}>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
 
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: "#F5F5F0", marginBottom: 8 }}>
+        <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 36, color: "#F5F5F0", marginBottom: 8 }}>
           Mes réservations
         </h1>
         <p style={{ color: "#8A8A9A", marginBottom: 40 }}>Suivez toutes vos réservations en cours et passées.</p>
@@ -85,7 +93,7 @@ export default function ReservationsPage() {
             }}>
               <div style={{ color: s.color }}>{s.icon}</div>
               <div>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: s.color }}>{s.count}</div>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, color: s.color }}>{s.count}</div>
                 <div style={{ fontSize: 13, color: "#8A8A9A" }}>{s.label}</div>
               </div>
             </div>
@@ -124,7 +132,7 @@ export default function ReservationsPage() {
               }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#F5F5F0" }}>
+                    <h3 style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, color: "#F5F5F0" }}>
                       {title}
                     </h3>
                     <span style={{
@@ -152,7 +160,7 @@ export default function ReservationsPage() {
 
                 <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#D4AF37" }}>
+                    <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, color: "#D4AF37" }}>
                       {Number(price).toLocaleString("fr")}€
                     </div>
                     <div style={{ fontSize: 11, color: "#8A8A9A" }}>5% commission incluse</div>
@@ -166,7 +174,7 @@ export default function ReservationsPage() {
                         style={{
                           background: "rgba(46,204,113,0.15)", border: "1px solid rgba(46,204,113,0.3)",
                           color: "#2ECC71", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                          fontSize: 13, fontFamily: "'Poppins', sans-serif",
+                          fontSize: 13, fontFamily: "inherit",
                         }}>Confirmer</button>
                       <button
                         onClick={() => updateMutation.mutate({ id: r.id, status: "cancelled" })}
@@ -174,7 +182,7 @@ export default function ReservationsPage() {
                         style={{
                           background: "rgba(231,76,60,0.1)", border: "1px solid rgba(231,76,60,0.2)",
                           color: "#E74C3C", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                          fontSize: 13, fontFamily: "'Poppins', sans-serif",
+                          fontSize: 13, fontFamily: "inherit",
                         }}>Refuser</button>
                     </div>
                   )}
@@ -186,7 +194,7 @@ export default function ReservationsPage() {
                       style={{
                         background: "rgba(231,76,60,0.1)", border: "1px solid rgba(231,76,60,0.2)",
                         color: "#E74C3C", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                        fontSize: 13, fontFamily: "'Poppins', sans-serif",
+                        fontSize: 13, fontFamily: "inherit",
                       }}>Annuler</button>
                   )}
 
@@ -194,7 +202,7 @@ export default function ReservationsPage() {
                     <button style={{
                       background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.2)",
                       color: "#D4AF37", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
-                      fontSize: 13, fontFamily: "'Poppins', sans-serif",
+                      fontSize: 13, fontFamily: "inherit",
                       display: "flex", alignItems: "center", gap: 6,
                     }}>
                       <Star size={14} /> Laisser un avis

@@ -40,7 +40,7 @@ export default function ExplorePage() {
 
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, color: "#F5F5F0", marginBottom: 8 }}>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, color: "#F5F5F0", marginBottom: 8 }}>
             Explorer les annonces
           </h1>
           <p style={{ color: "#8A8A9A" }}>
@@ -79,7 +79,7 @@ export default function ExplorePage() {
                   border: selectedType === t.id ? "none" : "1px solid rgba(42,42,58,0.8)",
                   color: selectedType === t.id ? "#0A0A0F" : "#F5F5F0",
                   padding: "8px 20px", borderRadius: 50, cursor: "pointer",
-                  fontFamily: "'Poppins', sans-serif", fontSize: 14, fontWeight: selectedType === t.id ? 600 : 400,
+                  fontFamily: "inherit", fontSize: 14, fontWeight: selectedType === t.id ? 600 : 400,
                 }}>{t.label}</button>
             ))}
           </div>
@@ -91,7 +91,7 @@ export default function ExplorePage() {
               border: !selectedCategory ? "1px solid rgba(212,175,55,0.4)" : "1px solid rgba(42,42,58,0.8)",
               color: !selectedCategory ? "#D4AF37" : "#8A8A9A",
               padding: "6px 16px", borderRadius: 50, cursor: "pointer",
-              fontFamily: "'Poppins', sans-serif", fontSize: 13,
+              fontFamily: "inherit", fontSize: 13,
             }}>Toutes</button>
             {CATEGORIES.map(cat => (
               <button key={cat.id} onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)} style={{
@@ -99,7 +99,7 @@ export default function ExplorePage() {
                 border: selectedCategory === cat.id ? `1px solid ${cat.color}60` : "1px solid rgba(42,42,58,0.8)",
                 color: selectedCategory === cat.id ? cat.color : "#8A8A9A",
                 padding: "6px 16px", borderRadius: 50, cursor: "pointer",
-                fontFamily: "'Poppins', sans-serif", fontSize: 13,
+                fontFamily: "inherit", fontSize: 13,
               }}>{cat.icon} {cat.label}</button>
             ))}
           </div>

@@ -35,15 +35,12 @@ export default function ListingCard({ listing, user }: Props) {
 
   return (
     <Link to={`/listing/${listing.id}`} style={{ textDecoration: "none" }}>
-      <div style={{
+      <div className="card-hover" style={{
         background: "rgba(26,26,38,0.8)", backdropFilter: "blur(12px)",
         border: `1px solid ${listing.featured ? "rgba(212,175,55,0.4)" : "rgba(42,42,58,0.8)"}`,
         borderRadius: 16, overflow: "hidden", cursor: "pointer",
-        transition: "all 0.2s", position: "relative",
-      }}
-        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 32px rgba(212,175,55,0.15)`; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
-      >
+        position: "relative",
+      }}>
         {/* Featured badge */}
         {listing.featured && (
           <div style={{
@@ -71,7 +68,7 @@ export default function ListingCard({ listing, user }: Props) {
           </div>
 
           <h3 style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600,
+            fontFamily: "'Syne', sans-serif", fontSize: 17, fontWeight: 600,
             color: "#F5F5F0", marginBottom: 8, lineHeight: 1.3,
           }}>{listing.title}</h3>
 
@@ -123,7 +120,7 @@ export default function ListingCard({ listing, user }: Props) {
           <div style={{ textAlign: "right" }}>
             {listing.price ? (
               <>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#D4AF37" }}>
+                <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 700, color: "#D4AF37" }}>
                   {listing.price}€
                 </div>
                 <div style={{ fontSize: 11, color: "#8A8A9A" }}>/ {listing.priceUnit}</div>

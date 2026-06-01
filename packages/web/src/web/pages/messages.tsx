@@ -4,6 +4,7 @@ import { Send, MessageCircle } from "lucide-react";
 import { authClient } from "../lib/auth";
 import { getToken } from "../lib/auth";
 import { useLocation } from "wouter";
+import { useToast } from "../components/Toast";
 
 const API = import.meta.env.VITE_SERVER_URL || "";
 
@@ -28,6 +29,7 @@ export default function MessagesPage() {
   const msgEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [location] = useLocation();
+  const { success, error } = useToast();
 
   // Pick up ?convoId= from query params (set by listing page contact button)
   useEffect(() => {
@@ -80,7 +82,9 @@ export default function MessagesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages", activeConvoId] });
       queryClient.invalidateQueries({ queryKey: ["conversations", userId] });
+      success("Message envoyé");
     },
+    onError: () => error("Échec de l'envoi"),
   });
 
   const send = () => {
@@ -125,7 +129,7 @@ export default function MessagesPage() {
         display: "flex", flexDirection: "column",
       }}>
         <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid rgba(42,42,58,0.8)" }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F5F5F0" }}>Messages</h2>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, color: "#F5F5F0" }}>Messages</h2>
         </div>
         <div style={{ flex: 1, overflowY: "auto" }}>
           {convosQuery.isLoading && (
@@ -239,7 +243,7 @@ export default function MessagesPage() {
                 style={{
                   flex: 1, padding: "12px 16px", borderRadius: 50,
                   background: "rgba(26,26,38,0.8)", border: "1px solid rgba(42,42,58,0.8)",
-                  color: "#F5F5F0", fontSize: 14, fontFamily: "'Poppins', sans-serif", outline: "none",
+                  color: "#F5F5F0", fontSize: 14, fontFamily: "inherit", outline: "none",
                 }} />
               <button onClick={send} disabled={sendMutation.isPending} style={{
                 background: "linear-gradient(135deg, #D4AF37, #FFBF00)",

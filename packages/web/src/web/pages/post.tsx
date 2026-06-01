@@ -5,12 +5,14 @@ import { CATEGORIES } from "../lib/categories";
 import { PlusCircle } from "lucide-react";
 import { authClient, getToken } from "../lib/auth";
 import { useCustomer } from "autumn-js/react";
+import { useToast } from "../components/Toast";
 
 export default function PostPage() {
   const [, navigate] = useLocation();
   const qc = useQueryClient();
   const { data: session } = authClient.useSession();
   const { data: customer, attach } = useCustomer();
+  const { success, error } = useToast();
   const activePlan = customer?.subscriptions?.[0]?.planId ?? "free";
   const canPost = activePlan === "pro" || activePlan === "vip";
 
@@ -44,8 +46,10 @@ export default function PostPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["listings"] });
+      success("Annonce publiée avec succès !");
       navigate("/profile");
     },
+    onError: () => error("Erreur lors de la publication."),
   });
 
   // Paywall if not pro/vip
@@ -54,7 +58,7 @@ export default function PostPage() {
       <div style={{ paddingTop: 64, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", padding: "80px 24px" }}>
         <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
           <div style={{ fontSize: 56, marginBottom: 20 }}>🔒</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: "#F5F5F0", marginBottom: 12 }}>
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 32, color: "#F5F5F0", marginBottom: 12 }}>
             Poster une annonce
           </h1>
           <p style={{ color: "#8A8A9A", fontSize: 15, marginBottom: 40, lineHeight: 1.7 }}>
@@ -93,7 +97,7 @@ export default function PostPage() {
   return (
     <div style={{ paddingTop: 80, minHeight: "100vh", background: "var(--bg-primary)", padding: "80px 24px" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: "#F5F5F0", marginBottom: 8 }}>
+        <h1 style={{ fontFamily: "'Syne', sans-serif", fontSize: 36, color: "#F5F5F0", marginBottom: 8 }}>
           Nouvelle annonce
         </h1>
         <p style={{ color: "#8A8A9A", marginBottom: 40 }}>Offre ou demande — visible par toute la communauté AURA.</p>

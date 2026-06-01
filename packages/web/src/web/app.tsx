@@ -9,13 +9,14 @@ import ListingPage from "./pages/listing";
 import ReservationsPage from "./pages/reservations";
 import SignInPage from "./pages/sign-in";
 import SignUpPage from "./pages/sign-up";
+import FamillePage from "./pages/famille";
 import { authClient } from "./lib/auth";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = authClient.useSession();
   if (isPending) return (
     <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#070711" }}>
-      <div style={{ color: "#D4AF37", fontSize: 24, fontWeight: 900, letterSpacing: 4 }}>BUTTERFLY</div>
+      <div style={{ color: "#D4AF37", fontSize: 24, fontWeight: 900, letterSpacing: 4 }}>AURA</div>
     </div>
   );
   if (!session) return <Redirect to="/sign-in" />;
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/reservations">
             <ProtectedRoute><ReservationsPage /></ProtectedRoute>
           </Route>
+          <Route path="/famille" component={FamillePage} />
         </Switch>
       </Route>
     </Switch>

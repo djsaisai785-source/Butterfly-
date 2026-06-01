@@ -5,6 +5,7 @@ import { useState } from "react";
 
 const C = {
   gold: "#D4AF37",
+  kido: "#4FC3F7",
   muted: "#8A8A9A",
   bg: "rgba(10,10,15,0.95)",
   border: "rgba(212,175,55,0.15)",
@@ -33,13 +34,13 @@ export default function Navbar() {
     }}>
       {/* Logo */}
       <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-        <img src="/logo.png" alt="Butterfly" style={{ width: 36, height: 36, objectFit: "contain" }} onError={e => (e.currentTarget.style.display = "none")} />
+        <img src="/logo.png" alt="AURA" style={{ width: 36, height: 36, objectFit: "contain" }} onError={e => (e.currentTarget.style.display = "none")} />
         <span style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: "20px", fontWeight: 700,
           background: "linear-gradient(135deg, #D4AF37, #FFBF00)",
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>BUTTERFLY</span>
+        }}>AURA</span>
       </Link>
 
       {/* Search */}
@@ -51,7 +52,7 @@ export default function Navbar() {
       }}>
         <Search size={16} color={C.muted} />
         <input
-          placeholder="Chercher DJ, chauffeur, table VIP..."
+          placeholder="Chercher DJ, nounou, chauffeur, table VIP..."
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "#F5F5F0", fontSize: "14px", width: "100%",
@@ -73,6 +74,20 @@ export default function Navbar() {
             padding: "8px 16px", borderRadius: 8, cursor: "pointer",
             fontFamily: "'Poppins', sans-serif", fontSize: "14px",
           }}>Explorer</button>
+        </Link>
+
+        {/* Famille KIDO */}
+        <Link to="/famille">
+          <button style={{
+            background: location === "/famille" ? "rgba(79,195,247,0.1)" : "transparent",
+            border: location === "/famille" ? "1px solid rgba(79,195,247,0.3)" : "1px solid transparent",
+            color: location === "/famille" ? C.kido : C.muted,
+            padding: "8px 16px", borderRadius: 8, cursor: "pointer",
+            fontFamily: "'Poppins', sans-serif", fontSize: "14px",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <span>👨‍👩‍👧</span> Famille
+          </button>
         </Link>
 
         {session && (

@@ -1,4 +1,6 @@
 import { Link } from "wouter";
+// KIDO color
+const KIDO_COLOR = "#4FC3F7";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import ListingCard from "../components/ListingCard";
@@ -77,7 +79,7 @@ export default function HomePage() {
           }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS.gold }} />
             <span style={{ fontSize: 12, color: COLORS.gold, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>
-              La marketplace de la nuit
+              Tout est possible. 24h/24.
             </span>
           </div>
 
@@ -92,7 +94,7 @@ export default function HomePage() {
           </h1>
 
           <p style={{ fontSize: 18, color: COLORS.muted, lineHeight: 1.7, marginBottom: 40, maxWidth: 560, margin: "0 auto 40px" }}>
-            DJs, chefs privés, chauffeurs VTC, tables VIP — BUTTERFLY connecte les professionnels de la nuit avec ceux qui en ont besoin.
+            DJs, chefs privés, chauffeurs VTC, tables VIP, services famille — AURA connecte les professionnels avec ceux qui en ont besoin, à toute heure.
           </p>
 
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
@@ -152,6 +154,55 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── KIDO BANNER ── */}
+      <section style={{ padding: "0 32px 64px", maxWidth: 1200, margin: "0 auto" }}>
+        <Link href="/famille" style={{ textDecoration: "none", display: "block" }}>
+          <div style={{
+            borderRadius: 24, padding: "40px 48px",
+            background: `linear-gradient(135deg, rgba(79,195,247,0.08) 0%, rgba(79,195,247,0.03) 100%)`,
+            border: `1px solid rgba(79,195,247,0.25)`,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 24, flexWrap: "wrap",
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: `rgba(79,195,247,0.06)`, filter: "blur(60px)", pointerEvents: "none" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: 18,
+                background: `rgba(79,195,247,0.12)`, border: `1px solid rgba(79,195,247,0.3)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 32, flexShrink: 0,
+              }}>👨‍👩‍👧‍👦</div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: 20, fontWeight: 900, color: KIDO_COLOR, letterSpacing: 2 }}>KIDO</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: KIDO_COLOR, letterSpacing: 1.5,
+                    background: `rgba(79,195,247,0.1)`, border: `1px solid rgba(79,195,247,0.3)`,
+                    borderRadius: 20, padding: "2px 8px", textTransform: "uppercase",
+                  }}>Famille & Enfants</span>
+                </div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: COLORS.text, margin: "0 0 6px" }}>
+                  Services dédiés aux familles
+                </h3>
+                <p style={{ fontSize: 14, color: COLORS.muted, margin: 0, lineHeight: 1.6 }}>
+                  Baby-sitters, cours particuliers, activités enfants, garde partagée — tout pour votre famille.
+                </p>
+              </div>
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: KIDO_COLOR, color: COLORS.bg,
+              borderRadius: 12, padding: "12px 24px",
+              fontSize: 14, fontWeight: 800, flexShrink: 0,
+              boxShadow: `0 0 30px rgba(79,195,247,0.25)`,
+            }}>
+              Découvrir KIDO →
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* ── FEATURED ── */}
       {featured.length > 0 && (
         <section style={{ padding: "0 32px 80px", maxWidth: 1200, margin: "0 auto" }}>
@@ -196,7 +247,7 @@ export default function HomePage() {
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <p style={{ fontSize: 12, color: COLORS.gold, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Pourquoi BUTTERFLY</p>
+            <p style={{ fontSize: 12, color: COLORS.gold, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Pourquoi AURA</p>
             <h2 style={{ fontSize: 36, fontWeight: 900, color: COLORS.text, margin: 0 }}>Conçu pour les professionnels</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 24 }}>
@@ -220,10 +271,10 @@ export default function HomePage() {
         background: `radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.08) 0%, transparent 60%), ${COLORS.bg}`,
       }}>
         <h2 style={{ fontSize: 44, fontWeight: 900, color: COLORS.text, margin: "0 0 16px", letterSpacing: -1 }}>
-          Rejoindre BUTTERFLY
+          Rejoindre AURA
         </h2>
         <p style={{ fontSize: 18, color: COLORS.muted, marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
-          Créez votre compte gratuitement et accédez à l'écosystème de la nuit.
+          Créez votre compte gratuitement et accédez à tout l'écosystème AURA.
         </p>
         <Link href="/sign-up" style={{
           display: "inline-block",
@@ -243,8 +294,8 @@ export default function HomePage() {
         color: COLORS.muted, fontSize: 13,
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <span style={{ fontWeight: 700, color: COLORS.gold, letterSpacing: 3, fontSize: 15 }}>BUTTERFLY</span>
-          <span>© 2025 BUTTERFLY · La marketplace de la nuit</span>
+          <span style={{ fontWeight: 700, color: COLORS.gold, letterSpacing: 3, fontSize: 15 }}>AURA</span>
+          <span>© 2025 AURA · Tout est possible. 24h/24.</span>
           <div style={{ display: "flex", gap: 20 }}>
             <a href="#" style={{ color: COLORS.muted, textDecoration: "none" }}>CGU</a>
             <a href="#" style={{ color: COLORS.muted, textDecoration: "none" }}>Confidentialité</a>

@@ -49,10 +49,10 @@ export default function SignInPage() {
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <Link href="/" style={{ textDecoration: "none" }}>
             <div style={{ fontSize: 28, fontWeight: 900, color: C.gold, letterSpacing: 5, textTransform: "uppercase", display: "inline-block" }}>
-              BUTTERFLY
+              AURA
             </div>
           </Link>
-          <p style={{ color: C.muted, fontSize: 14, marginTop: 8 }}>La marketplace de la nuit</p>
+          <p style={{ color: C.muted, fontSize: 14, marginTop: 8 }}>Tout est possible. 24h/24.</p>
         </div>
 
         {/* Card */}

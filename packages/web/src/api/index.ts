@@ -271,12 +271,18 @@ const app = new Hono()
   // ─── SEED (dev only) ───
   .post("/seed", async (c) => {
     const seedUsers = [
+      // ── AURA / Nightlife ──
       { id: "u1", name: "Marco Rossi", email: "marco@aura.app", type: "pro", location: "Paris", verified: true, rating: 4.8, reviewCount: 42, bio: "DJ professionnel depuis 15 ans. House, deep, afro.", categories: JSON.stringify(["nightlife"]) },
       { id: "u2", name: "Sophie Laurent", email: "sophie@aura.app", type: "pro", location: "Nice", verified: true, rating: 4.9, reviewCount: 87, bio: "Chef étoilée & traiteur événementiel haut de gamme", categories: JSON.stringify(["restauration"]) },
       { id: "u3", name: "Karim Diallo", email: "karim@aura.app", type: "user", location: "Cannes", verified: true, rating: 4.5, reviewCount: 12, bio: "Chauffeur VTC premium, disponible 24h/24", categories: JSON.stringify(["transport"]) },
       { id: "u4", name: "Lucie Moreau", email: "lucie@aura.app", type: "vip", location: "Paris", verified: true, rating: 5.0, reviewCount: 34, bio: "Directrice artistique & event planner", categories: JSON.stringify(["nightlife", "emploi"]) },
       { id: "u5", name: "Alexandre Petit", email: "alex@aura.app", type: "pro", location: "Lyon", verified: false, rating: 4.2, reviewCount: 8, bio: "Barman & mixologue spécialisé cocktails premium", categories: JSON.stringify(["emploi", "restauration"]) },
       { id: "u6", name: "Camille Dubois", email: "camille@aura.app", type: "user", location: "Marseille", verified: false, rating: 0, reviewCount: 0, bio: "Passionnée de gastronomie et de nuits parisiennes", categories: JSON.stringify(["dating", "restauration"]) },
+      // ── KIDO / Famille ──
+      { id: "k1", name: "Isabelle Fontaine", email: "isabelle@aura.app", type: "pro", location: "Lyon", verified: true, rating: 4.9, reviewCount: 61, bio: "Guide rando famille, passionnée de plein air et nature", categories: JSON.stringify(["famille", "rando"]) },
+      { id: "k2", name: "Arnaud Lemaire", email: "arnaud@aura.app", type: "pro", location: "Nice", verified: true, rating: 4.8, reviewCount: 54, bio: "Animateur jeunesse & ateliers créatifs depuis 12 ans", categories: JSON.stringify(["famille", "atelier"]) },
+      { id: "k3", name: "Nadia Bensaid", email: "nadia@aura.app", type: "vip", location: "Paris", verified: true, rating: 5.0, reviewCount: 29, bio: "Nounou diplômée, 10 ans d'expérience, premiers secours certifiée", categories: JSON.stringify(["famille", "nounou"]) },
+      { id: "k4", name: "Pierre Gauthier", email: "pierre@aura.app", type: "pro", location: "Marseille", verified: true, rating: 4.7, reviewCount: 38, bio: "Maître-nageur & instructeur aquatique bébé-nageurs", categories: JSON.stringify(["famille", "baignade"]) },
     ];
 
     for (const u of seedUsers) {
@@ -284,6 +290,7 @@ const app = new Hono()
     }
 
     const seedListings = [
+      // ── AURA / Nightlife ──
       { id: "l1", userId: "u1", type: "offer", category: "nightlife", title: "DJ Set Premium — Soirée Privée", description: "DJ professionnel disponible pour vos soirées privées, villas, clubs. Matériel inclus. Répertoire : house, deep, afro.", price: 800, priceUnit: "soiree", location: "Paris / Île-de-France", tags: JSON.stringify(["DJ", "soirée", "privé", "musique"]), status: "active", featured: true },
       { id: "l2", userId: "u2", type: "offer", category: "restauration", title: "Chef Privé à Domicile — Dîner Gastronomique", description: "Cuisine étoilée chez vous. Menu personnalisé, service complet, accord mets-vins. Jusqu'à 20 personnes.", price: 350, priceUnit: "personne", location: "Nice & Côte d'Azur", tags: JSON.stringify(["chef", "gastronomie", "dîner", "luxe"]), status: "active", featured: true },
       { id: "l3", userId: "u3", type: "offer", category: "transport", title: "Chauffeur VTC — Service Nocturne 24h/24", description: "Disponible 24h/24 7j/7. Mercedes Classe S & Tesla. Aéroports, clubs, transferts VIP.", price: 60, priceUnit: "heure", location: "Cannes, Nice, Monaco", tags: JSON.stringify(["VTC", "chauffeur", "nuit", "aéroport"]), status: "active", featured: false },
@@ -292,6 +299,14 @@ const app = new Hono()
       { id: "l6", userId: "u3", type: "demand", category: "emploi", title: "Recherche Barman — Vendredi & Samedi soir", description: "Club privé cherche barman expérimenté cocktails pour les weekends. 150€/soir + pourboires.", price: 150, priceUnit: "soiree", location: "Paris, 8ème", tags: JSON.stringify(["barman", "cocktail", "club", "emploi nuit"]), status: "active", featured: false },
       { id: "l7", userId: "u6", type: "offer", category: "dating", title: "Dîner & Découverte — Soirée Authentique", description: "Passionnée de gastronomie et de culture, je cherche une rencontre sincère autour d'un bon repas ou d'une soirée jazz.", price: null, priceUnit: null, location: "Marseille", tags: JSON.stringify(["rencontre", "dîner", "jazz", "authentique"]), status: "active", featured: false },
       { id: "l8", userId: "u1", type: "demand", category: "transport", title: "Recherche VTC — Aéroport CDG → Paris", description: "Besoin d'un chauffeur VTC pour un transfert depuis CDG vers Paris 16ème. Samedi 22h. Véhicule premium.", price: 120, priceUnit: "prestation", location: "CDG → Paris", tags: JSON.stringify(["CDG", "aéroport", "transfert", "premium"]), status: "active", featured: false },
+      // ── KIDO / Famille ──
+      { id: "k1", userId: "k1", type: "offer", category: "famille", title: "Rando famille — Gorges du Verdon", description: "Balade guidée de 3h adaptée aux enfants dès 5 ans. Panoramas incroyables, pique-nique inclus. Groupe max 10 personnes.", price: 25, priceUnit: "personne", location: "Gorges du Verdon, PACA", tags: JSON.stringify(["rando", "nature", "famille", "enfants"]), status: "active", featured: true },
+      { id: "k2", userId: "k2", type: "offer", category: "famille", title: "Atelier Poterie Enfants — 4 à 12 ans", description: "Initiation à la poterie en petit groupe. Chaque enfant repart avec sa création cuite et peinte. Tabliers fournis.", price: 18, priceUnit: "enfant", location: "Nice, Côte d'Azur", tags: JSON.stringify(["poterie", "atelier", "créatif"]), status: "active", featured: true },
+      { id: "k3", userId: "k3", type: "offer", category: "famille", title: "Nounou diplômée — Garde à domicile", description: "Disponible soirs et weekends. Expérience avec bébés et enfants jusqu'à 6 ans. Premiers secours certifiée.", price: 14, priceUnit: "heure", location: "Paris 11ème", tags: JSON.stringify(["nounou", "garde", "bébé", "domicile"]), status: "active", featured: false },
+      { id: "k4", userId: "k4", type: "offer", category: "famille", title: "Cours natation Bébé-Nageurs — 6 mois à 3 ans", description: "Séances d'aqua-éveil en piscine chauffée. Accompagné d'un parent. Inscription par trimestre.", price: 120, priceUnit: "trimestre", location: "Marseille", tags: JSON.stringify(["natation", "bébé", "aquatique"]), status: "active", featured: false },
+      { id: "k5", userId: "k1", type: "offer", category: "famille", title: "Spot plage secrète — Calanques", description: "Je partage mon spot préféré dans les calanques. Eau turquoise, ombre naturelle. Accès 30min à pied.", price: null, priceUnit: null, location: "Marseille, Calanques", tags: JSON.stringify(["plage", "calanques", "gratuit"]), status: "active", featured: true },
+      { id: "k6", userId: "k2", type: "offer", category: "famille", title: "Spectacle Marionnettes — dès 3 ans", description: "Représentations chaque samedi matin. 45 minutes de magie pour toute la famille.", price: 8, priceUnit: "enfant", location: "Nice, Centre-ville", tags: JSON.stringify(["marionnettes", "spectacle", "enfants"]), status: "active", featured: false },
+      { id: "k7", userId: "k1", type: "demand", category: "famille", title: "Cherche nounou — 2 soirs/semaine Paris", description: "Famille avec 2 enfants (4 et 7 ans) cherche nounou de confiance pour mardis et jeudis soir à partir de 18h.", price: 13, priceUnit: "heure", location: "Paris 20ème", tags: JSON.stringify(["nounou", "garde", "soir"]), status: "active", featured: false },
     ];
 
     for (const l of seedListings) {

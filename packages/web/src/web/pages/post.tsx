@@ -96,7 +96,7 @@ export default function PostPage() {
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: "#F5F5F0", marginBottom: 8 }}>
           Nouvelle annonce
         </h1>
-        <p style={{ color: "#8A8A9A", marginBottom: 40 }}>Offre ou demande — visible par toute la communauté BUTTERFLY.</p>
+        <p style={{ color: "#8A8A9A", marginBottom: 40 }}>Offre ou demande — visible par toute la communauté AURA.</p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 

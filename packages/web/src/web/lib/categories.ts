@@ -7,6 +7,7 @@ export const CATEGORIES = [
   { id: "transport", label: "Transport", icon: "🚗", color: "#5E60CE", items: ["VTC nuit", "Limousine", "Navette club", "Bateau-taxi"] },
   { id: "restauration", label: "Restauration", icon: "🍽️", color: "#FF6B6B", items: ["Chef privé", "Traiteur", "Bar", "Food truck", "After party"] },
   { id: "hebergement", label: "Hébergement", icon: "🏨", color: "#48CAE4", items: ["Hôtel", "Villa", "Yacht", "Airbnb", "Suite"] },
+  { id: "famille", label: "Famille", icon: "👨‍👩‍👧‍👦", color: "#4FC3F7", items: ["Baby-sitter", "Cours particuliers", "Garde d'enfants", "Activités enfants", "Aide aux devoirs"] },
 ];
 
 export const getCategoryColor = (id: string) => CATEGORIES.find(c => c.id === id)?.color || "#9B5DE5";

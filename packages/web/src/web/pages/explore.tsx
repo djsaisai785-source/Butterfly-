@@ -85,7 +85,7 @@ export default function ExplorePage() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "#8A8A9A" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🦋</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
             <p style={{ fontSize: 18 }}>Aucune annonce trouvée</p>
           </div>
         ) : (

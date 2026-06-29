@@ -2,16 +2,14 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
+  Modal,
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "../lib/api";
+import { useState } from "react";
 
 const { width } = Dimensions.get("window");
 
@@ -23,49 +21,66 @@ const COLORS = {
   border: "#1E1E2E",
   text: "#F5F0E8",
   muted: "#6B6880",
-  night: "#1A1A2E",
 };
 
-const CATEGORIES = [
-  { id: "all", label: "Tout", emoji: "✨" },
-  { id: "nightlife", label: "Nuit", emoji: "🌙" },
-  { id: "restauration", label: "Food", emoji: "🍽️" },
-  { id: "transport", label: "Transport", emoji: "🚗" },
-  { id: "emploi", label: "Emploi", emoji: "💼" },
-  { id: "dating", label: "Dating", emoji: "❤️" },
+const UNIVERSES = [
+  {
+    id: "butterfly",
+    name: "Butterfly",
+    emoji: "🦋",
+    tagline: "Nightlife • Clubs • Soirées",
+    color: "#1A0A2E",
+    accent: "#9B59B6",
+    restricted: true,
+  },
+  {
+    id: "kido",
+    name: "Kido",
+    emoji: "🎈",
+    tagline: "Famille • Sorties • Activités",
+    color: "#0A1A2E",
+    accent: "#4FC3F7",
+    restricted: false,
+  },
+  {
+    id: "soon1",
+    name: "Bientôt",
+    emoji: "✨",
+    tagline: "Prochainement...",
+    color: "#13131A",
+    accent: "#D4AF37",
+    restricted: false,
+    comingSoon: true,
+  },
+  {
+    id: "soon2",
+    name: "Bientôt",
+    emoji: "🔮",
+    tagline: "Prochainement...",
+    color: "#13131A",
+    accent: "#D4AF37",
+    restricted: false,
+    comingSoon: true,
+  },
 ];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  nightlife: "#1A1A3E",
-  restauration: "#1E1209",
-  transport: "#0D1A2E",
-  emploi: "#0D1E16",
-  dating: "#2E0D1A",
-  all: "#13131A",
-};
-
-import { useState } from "react";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [showAgeModal, setShowAgeModal] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["listings", activeCategory],
-    queryFn: async () => {
-      const res = await api.listings.$get();
-      return res.json();
-    },
-  });
+  const handleUniversePress = (universe: typeof UNIVERSES[0]) => {
+    if (universe.comingSoon) return;
+    if (universe.restricted) {
+      setShowAgeModal(true);
+    } else {
+      router.push(`/universe/${universe.id}`);
+    }
+  };
 
-  const listings = (data as any)?.listings ?? [];
-  const filtered =
-    activeCategory === "all"
-      ? listings
-      : listings.filter((l: any) => l.listing?.category === activeCategory);
-
-  const featured = filtered.filter((l: any) => l.listing?.featured);
-  const recent = filtered.filter((l: any) => !l.listing?.featured);
+  const confirmAge = () => {
+    setShowAgeModal(false);
+    router.push("/universe/butterfly");
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
@@ -73,8 +88,8 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Bonsoir 👋</Text>
-            <Text style={styles.tagline}>Peu importe l'heure. Tout est possible.</Text>
+            <Text style={styles.appName}>AURA</Text>
+            <Text style={styles.tagline}>Ton monde. 24h/24.</Text>
           </View>
           <TouchableOpacity
             style={styles.profileBtn}
@@ -84,143 +99,57 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Gold divider */}
         <View style={styles.goldLine} />
 
-        {/* Categories */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.catScroll}
-        >
-          {CATEGORIES.map((cat) => (
+        {/* Section title */}
+        <Text style={styles.sectionTitle}>Nos univers</Text>
+        <Text style={styles.sectionSub}>Choisissez votre monde</Text>
+
+        {/* Universe grid */}
+        <View style={styles.grid}>
+          {UNIVERSES.map((u) => (
             <TouchableOpacity
-              key={cat.id}
-              style={[styles.catChip, activeCategory === cat.id && styles.catChipActive]}
-              onPress={() => setActiveCategory(cat.id)}
+              key={u.id}
+              style={[
+                styles.card,
+                { backgroundColor: u.color, borderColor: u.accent + "44" },
+                u.comingSoon && styles.cardDimmed,
+              ]}
+              onPress={() => handleUniversePress(u)}
+              activeOpacity={u.comingSoon ? 1 : 0.8}
             >
-              <Text style={styles.catEmoji}>{cat.emoji}</Text>
-              <Text style={[styles.catLabel, activeCategory === cat.id && styles.catLabelActive]}>
-                {cat.label}
+              {u.restricted && (
+                <View style={styles.ageBadge}>
+                  <Text style={styles.ageBadgeText}>+18</Text>
+                </View>
+              )}
+              {u.comingSoon && (
+                <View style={[styles.ageBadge, { backgroundColor: "#D4AF3733", borderColor: "#D4AF37" }]}>
+                  <Text style={[styles.ageBadgeText, { color: COLORS.gold }]}>Soon</Text>
+                </View>
+              )}
+              <Text style={styles.cardEmoji}>{u.emoji}</Text>
+              <Text style={[styles.cardName, { color: u.comingSoon ? COLORS.muted : COLORS.text }]}>
+                {u.name}
               </Text>
+              <Text style={styles.cardTagline}>{u.tagline}</Text>
+              {!u.comingSoon && (
+                <View style={[styles.enterBtn, { backgroundColor: u.accent + "22", borderColor: u.accent + "66" }]}>
+                  <Text style={[styles.enterBtnText, { color: u.accent }]}>Entrer →</Text>
+                </View>
+              )}
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
 
-        {isLoading ? (
-          <ActivityIndicator color={COLORS.gold} style={{ marginTop: 40 }} />
-        ) : (
-          <>
-            {/* Featured */}
-            {featured.length > 0 && (
-              <>
-                <Text style={styles.sectionTitle}>À la une ✦</Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.featuredScroll}
-                >
-                  {featured.map((item: any) => {
-                    const l = item.listing;
-                    const u = item.user;
-                    const bgColor = CATEGORY_COLORS[l.category] ?? COLORS.surface;
-                    return (
-                      <TouchableOpacity
-                        key={l.id}
-                        style={[styles.featuredCard, { backgroundColor: bgColor }]}
-                        onPress={() => router.push(`/listing/${l.id}`)}
-                      >
-                        <View style={styles.featuredBadge}>
-                          <Text style={styles.featuredBadgeText}>✦ À LA UNE</Text>
-                        </View>
-                        <Text style={styles.featuredEmoji}>
-                          {CATEGORIES.find((c) => c.id === l.category)?.emoji ?? "✨"}
-                        </Text>
-                        <Text style={styles.featuredTitle} numberOfLines={2}>
-                          {l.title}
-                        </Text>
-                        <Text style={styles.featuredLocation}>{l.location}</Text>
-                        {l.price && (
-                          <Text style={styles.featuredPrice}>
-                            {l.price}€ / {l.priceUnit}
-                          </Text>
-                        )}
-                        {u?.name && (
-                          <View style={styles.featuredUser}>
-                            <View style={styles.miniAvatar}>
-                              <Text style={styles.miniAvatarText}>{u.name[0]}</Text>
-                            </View>
-                            <Text style={styles.featuredUserName}>{u.name}</Text>
-                            {u.verified && <Text style={styles.verifiedBadge}>✓</Text>}
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </>
-            )}
-
-            {/* Recent */}
-            <Text style={styles.sectionTitle}>Récent</Text>
-            {recent.length === 0 && filtered.length === 0 && (
-              <Text style={styles.empty}>Aucune annonce pour le moment</Text>
-            )}
-            {recent.map((item: any) => {
-              const l = item.listing;
-              const u = item.user;
-              const bgColor = CATEGORY_COLORS[l.category] ?? COLORS.surface;
-              return (
-                <TouchableOpacity
-                  key={l.id}
-                  style={styles.card}
-                  onPress={() => router.push(`/listing/${l.id}`)}
-                >
-                  <View style={[styles.cardEmoji, { backgroundColor: bgColor }]}>
-                    <Text style={{ fontSize: 28 }}>
-                      {CATEGORIES.find((c) => c.id === l.category)?.emoji ?? "✨"}
-                    </Text>
-                  </View>
-                  <View style={styles.cardContent}>
-                    <View style={styles.cardTop}>
-                      <Text style={styles.cardCategory}>
-                        {CATEGORIES.find((c) => c.id === l.category)?.label ?? l.category}
-                      </Text>
-                      <Text style={styles.cardType}>
-                        {l.type === "offer" ? "✅ Offre" : "🔎 Recherche"}
-                      </Text>
-                    </View>
-                    <Text style={styles.cardTitle} numberOfLines={2}>{l.title}</Text>
-                    <View style={styles.cardBottom}>
-                      <Text style={styles.cardLocation}>📍 {l.location}</Text>
-                      {l.price && (
-                        <Text style={styles.cardPrice}>{l.price}€/{l.priceUnit}</Text>
-                      )}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-            <View style={{ height: 100 }} />
-          </>
-        )}
+        <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* Bottom nav */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/")}>
+        <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIconActive}>🏠</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Accueil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/explore")}>
-          <Text style={styles.navIcon}>🔍</Text>
-          <Text style={styles.navLabel}>Explorer</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navPostBtn}
-          onPress={() => router.push("/post")}
-        >
-          <Text style={styles.navPostText}>+</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/messages")}>
           <Text style={styles.navIcon}>💬</Text>
@@ -231,6 +160,29 @@ export default function HomeScreen() {
           <Text style={styles.navLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
+
+      {/* +18 Modal */}
+      <Modal visible={showAgeModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalEmoji}>🦋</Text>
+            <Text style={styles.modalTitle}>Butterfly</Text>
+            <Text style={styles.modalSub}>Nightlife • Clubs • Soirées</Text>
+            <View style={styles.modalDivider} />
+            <Text style={styles.modalWarning}>⚠️ Contenu réservé aux adultes</Text>
+            <Text style={styles.modalText}>
+              Cet univers contient du contenu réservé aux personnes majeures (+18 ans).
+            </Text>
+            <Text style={styles.modalQuestion}>Confirmez-vous avoir 18 ans ou plus ?</Text>
+            <TouchableOpacity style={styles.confirmBtn} onPress={confirmAge}>
+              <Text style={styles.confirmBtnText}>✓ Oui, j'ai 18 ans ou plus</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowAgeModal(false)}>
+              <Text style={styles.cancelBtnText}>Non, retour</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -246,8 +198,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
   },
-  greeting: { fontSize: 13, color: COLORS.muted, marginBottom: 2 },
-  tagline: { fontSize: 16, fontWeight: "700", color: COLORS.text, maxWidth: 240 },
+  appName: { fontSize: 28, fontWeight: "900", color: COLORS.gold, letterSpacing: 4 },
+  tagline: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
   profileBtn: {
     width: 40,
     height: 40,
@@ -260,88 +212,56 @@ const styles = StyleSheet.create({
   },
   profileInitial: { color: COLORS.gold, fontWeight: "700", fontSize: 16 },
   goldLine: { height: 1, backgroundColor: COLORS.gold, marginHorizontal: 20, opacity: 0.3 },
-  catScroll: { paddingHorizontal: 16, paddingVertical: 14, gap: 8 },
-  catChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  catChipActive: { borderColor: COLORS.gold, backgroundColor: COLORS.goldDim },
-  catEmoji: { fontSize: 14 },
-  catLabel: { fontSize: 13, color: COLORS.muted, fontWeight: "600" },
-  catLabelActive: { color: COLORS.gold },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "800",
     color: COLORS.text,
     paddingHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 10,
+    marginTop: 24,
     letterSpacing: 0.5,
   },
-  featuredScroll: { paddingHorizontal: 16, gap: 12, paddingBottom: 4 },
-  featuredCard: {
-    width: width * 0.72,
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: 6,
+  sectionSub: {
+    fontSize: 13,
+    color: COLORS.muted,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-  featuredBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: COLORS.goldDim,
-    borderRadius: 4,
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 12,
+    gap: 12,
+  },
+  card: {
+    width: (width - 36) / 2,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    gap: 8,
+    position: "relative",
+  },
+  cardDimmed: { opacity: 0.5 },
+  ageBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#FF4444",
+    borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  featuredBadgeText: { fontSize: 9, color: COLORS.gold, fontWeight: "800", letterSpacing: 1 },
-  featuredEmoji: { fontSize: 36, marginTop: 4 },
-  featuredTitle: { fontSize: 16, fontWeight: "700", color: COLORS.text, marginTop: 4 },
-  featuredLocation: { fontSize: 12, color: COLORS.muted },
-  featuredPrice: { fontSize: 14, fontWeight: "700", color: COLORS.gold, marginTop: 4 },
-  featuredUser: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8 },
-  miniAvatar: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: COLORS.goldDim,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  miniAvatarText: { fontSize: 10, color: COLORS.gold, fontWeight: "700" },
-  featuredUserName: { fontSize: 12, color: COLORS.muted },
-  verifiedBadge: { fontSize: 11, color: COLORS.gold },
-  card: {
-    flexDirection: "row",
-    marginHorizontal: 16,
-    marginBottom: 10,
-    borderRadius: 14,
-    backgroundColor: COLORS.surface,
+  ageBadgeText: { fontSize: 10, color: "#fff", fontWeight: "800" },
+  cardEmoji: { fontSize: 40, marginBottom: 4 },
+  cardName: { fontSize: 18, fontWeight: "800", color: COLORS.text },
+  cardTagline: { fontSize: 11, color: COLORS.muted, lineHeight: 16 },
+  enterBtn: {
+    marginTop: 8,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    overflow: "hidden",
-  },
-  cardEmoji: {
-    width: 70,
+    paddingVertical: 8,
     alignItems: "center",
-    justifyContent: "center",
   },
-  cardContent: { flex: 1, padding: 12, gap: 4 },
-  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardCategory: { fontSize: 11, color: COLORS.gold, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
-  cardType: { fontSize: 11, color: COLORS.muted },
-  cardTitle: { fontSize: 14, fontWeight: "600", color: COLORS.text },
-  cardBottom: { flexDirection: "row", justifyContent: "space-between", marginTop: 4 },
-  cardLocation: { fontSize: 11, color: COLORS.muted },
-  cardPrice: { fontSize: 12, fontWeight: "700", color: COLORS.gold },
-  empty: { color: COLORS.muted, textAlign: "center", marginTop: 40, fontSize: 14 },
+  enterBtnText: { fontSize: 12, fontWeight: "700" },
   bottomNav: {
     flexDirection: "row",
     backgroundColor: COLORS.surface,
@@ -358,19 +278,45 @@ const styles = StyleSheet.create({
   navIconActive: { fontSize: 20 },
   navLabel: { fontSize: 10, color: COLORS.muted },
   navLabelActive: { color: COLORS.gold, fontWeight: "700" },
-  navPostBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: COLORS.gold,
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "#000000CC",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -20,
-    shadowColor: COLORS.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 8,
+    padding: 24,
   },
-  navPostText: { fontSize: 26, color: COLORS.bg, fontWeight: "300", lineHeight: 30 },
+  modalBox: {
+    backgroundColor: "#13131A",
+    borderRadius: 24,
+    padding: 28,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#9B59B644",
+    alignItems: "center",
+  },
+  modalEmoji: { fontSize: 48, marginBottom: 8 },
+  modalTitle: { fontSize: 24, fontWeight: "900", color: COLORS.text, letterSpacing: 2 },
+  modalSub: { fontSize: 12, color: COLORS.muted, marginBottom: 16 },
+  modalDivider: { height: 1, backgroundColor: COLORS.border, width: "100%", marginBottom: 16 },
+  modalWarning: { fontSize: 14, fontWeight: "700", color: "#FF4444", marginBottom: 8 },
+  modalText: { fontSize: 13, color: COLORS.muted, textAlign: "center", lineHeight: 20, marginBottom: 12 },
+  modalQuestion: { fontSize: 14, fontWeight: "700", color: COLORS.text, textAlign: "center", marginBottom: 20 },
+  confirmBtn: {
+    backgroundColor: "#9B59B622",
+    borderWidth: 1,
+    borderColor: "#9B59B6",
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  confirmBtnText: { color: "#9B59B6", fontWeight: "700", fontSize: 14 },
+  cancelBtn: {
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  cancelBtnText: { color: COLORS.muted, fontSize: 13 },
 });

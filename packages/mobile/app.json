@@ -6,7 +6,7 @@
     "scheme": "butterfly",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A0A0F"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": false
     },
     "ios": {
       "bundleIdentifier": "com.butterfly.night",

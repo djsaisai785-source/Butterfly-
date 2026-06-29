@@ -7,6 +7,8 @@ import { nanoid } from "nanoid";
 import { auth } from "./auth";
 import Stripe from "stripe";
 import { Autumn } from "autumn-js";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_placeholder");
 const autumnSdk = new Autumn();
@@ -32,12 +34,57 @@ const app = new Hono()
   // Health
   .get("/health", (c) => c.json({ status: "ok" }, 200))
 
+  // ─── UPLOAD ───
+  .post("/upload", async (c) => {
+    try {
+      const session = await auth.api.getSession({ headers: c.req.raw.headers });
+      if (!session) return c.json({ error: "Unauthorized" }, 401);
+      const formData = await c.req.formData();
+      const file = formData.get("file") as File | null;
+      if (!file) return c.json({ error: "No file provided" }, 400);
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const allowed = ["jpg", "jpeg", "png", "webp", "gif"];
+      if (!allowed.includes(ext)) return c.json({ error: "Invalid file type" }, 400);
+      const filename = `${nanoid()}.${ext}`;
+      const uploadsDir = join(process.cwd(), "public", "uploads");
+      await mkdir(uploadsDir, { recursive: true });
+      const buffer = await file.arrayBuffer();
+      await writeFile(join(uploadsDir, filename), Buffer.from(buffer));
+      return c.json({ url: `/uploads/${filename}` }, 200);
+    } catch (e: any) {
+      console.error("[upload POST]", e?.message);
+      return c.json({ error: e?.message ?? "Upload failed" }, 500);
+    }
+  })
+
   // ─── USERS ───
   .get("/users/:id", async (c) => {
     const { id } = c.req.param();
     const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
     if (!user) return c.json({ error: "Not found" }, 404);
-    return c.json({ user }, 200);
+    // Fetch active listings
+    const listings = await db.select({
+      listing: schema.listings,
+    })
+      .from(schema.listings)
+      .where(and(eq(schema.listings.userId, id), eq(schema.listings.status, "active")))
+      .orderBy(desc(schema.listings.createdAt))
+      .limit(20);
+    // Fetch reviews received
+    const reviews = await db.select({
+      review: schema.reviews,
+      reviewer: {
+        id: schema.users.id,
+        name: schema.users.name,
+        avatar: schema.users.avatar,
+      },
+    })
+      .from(schema.reviews)
+      .leftJoin(schema.users, eq(schema.reviews.reviewerId, schema.users.id))
+      .where(eq(schema.reviews.reviewedId, id))
+      .orderBy(desc(schema.reviews.createdAt))
+      .limit(10);
+    return c.json({ user, listings, reviews }, 200);
   })
   .post("/users", async (c) => {
     const body = await c.req.json();
@@ -129,12 +176,22 @@ const app = new Hono()
   })
   .put("/listings/:id", async (c) => {
     const { id } = c.req.param();
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) return c.json({ error: "Unauthorized" }, 401);
+    const [existing] = await db.select({ userId: schema.listings.userId }).from(schema.listings).where(eq(schema.listings.id, id));
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    if (existing.userId !== session.user.id) return c.json({ error: "Forbidden" }, 403);
     const body = await c.req.json();
     const [listing] = await db.update(schema.listings).set({ ...body, updatedAt: new Date() }).where(eq(schema.listings.id, id)).returning();
     return c.json({ listing }, 200);
   })
   .delete("/listings/:id", async (c) => {
     const { id } = c.req.param();
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) return c.json({ error: "Unauthorized" }, 401);
+    const [existing] = await db.select({ userId: schema.listings.userId }).from(schema.listings).where(eq(schema.listings.id, id));
+    if (!existing) return c.json({ error: "Not found" }, 404);
+    if (existing.userId !== session.user.id) return c.json({ error: "Forbidden" }, 403);
     await db.delete(schema.listings).where(eq(schema.listings.id, id));
     return c.json({ success: true }, 200);
   })

@@ -216,6 +216,17 @@ export default function Navbar() {
                       📅 Mes réservations
                     </button>
                   </Link>
+                  <Link to="/qrcode" onClick={() => setMenuOpen(false)}>
+                    <button style={{
+                      width: "100%", textAlign: "left", padding: "10px 14px",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      color: "#F5F5F0", fontSize: 14, borderRadius: 8,
+                      display: "flex", alignItems: "center", gap: 10,
+                      fontFamily: "inherit",
+                    }}>
+                      📲 Mon QR Code
+                    </button>
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     style={{

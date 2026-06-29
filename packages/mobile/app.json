@@ -1,39 +1,44 @@
 {
   "expo": {
+    "name": "BUTTERFLY",
+    "slug": "aura",
+    "version": "1.0.0",
+    "scheme": "butterfly",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
     "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A0A0F"
+    },
     "android": {
-      "package": "com.aura_a7k3.runable",
+      "package": "com.butterfly.night",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0A0A0F"
       },
       "edgeToEdgeEnabled": true
     },
-    "extra": {
-      "apiUrl": "https://1nyq1tcvj222hlpkfqr4j-preview-4200.runable.site/"
-    },
     "ios": {
-      "bundleIdentifier": "com.aura_a7k3.runable",
+      "bundleIdentifier": "com.butterfly.night",
       "supportsTablet": true
     },
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#0A0A0F"
-    },
-    "name": "AURA",
-    "slug": "aura",
-    "version": "1.0.0",
-    "scheme": "aura",
-    "orientation": "portrait",
-    "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "apiUrl": "https://butterfly-night-app.netlify.app/",
+      "router": {},
+      "eas": {
+        "projectId": "c0b46e62-feff-4a19-acb0-ceb4f7660712"
+      }
+    },
+    "owner": "aurabutterflys-team"
   }
 }

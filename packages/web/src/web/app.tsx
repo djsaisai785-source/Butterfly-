@@ -6,10 +6,12 @@ import PostPage from "./pages/post";
 import MessagesPage from "./pages/messages";
 import ProfilePage from "./pages/profile";
 import ListingPage from "./pages/listing";
+import UserPage from "./pages/user";
 import ReservationsPage from "./pages/reservations";
 import SignInPage from "./pages/sign-in";
 import SignUpPage from "./pages/sign-up";
 import FamillePage from "./pages/famille";
+import QRCodePage from "./pages/qrcode";
 import NotFoundPage from "./pages/not-found";
 import { authClient } from "./lib/auth";
 
@@ -38,6 +40,7 @@ export default function App() {
           <Route path="/" component={HomePage} />
           <Route path="/explore" component={ExplorePage} />
           <Route path="/listing/:id" component={ListingPage} />
+          <Route path="/user/:id" component={UserPage} />
           <Route path="/post">
             <ProtectedRoute><PostPage /></ProtectedRoute>
           </Route>
@@ -48,6 +51,7 @@ export default function App() {
             <ProtectedRoute><ReservationsPage /></ProtectedRoute>
           </Route>
           <Route path="/famille" component={FamillePage} />
+          <Route path="/qrcode" component={QRCodePage} />
           <Route component={NotFoundPage} />
         </Switch>
       </Route>

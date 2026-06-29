@@ -330,7 +330,7 @@ export default function ListingPage() {
                 background: "rgba(26,26,38,0.8)", border: "1px solid rgba(42,42,58,0.8)",
                 borderRadius: 20, padding: 24,
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                <a href={`/user/${user.id}`} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
                   <div style={{
                     width: 52, height: 52, borderRadius: "50%",
                     background: "linear-gradient(135deg, #D4AF37, #B76E79)",
@@ -347,8 +347,9 @@ export default function ListingPage() {
                         <Star size={12} fill="#D4AF37" /> {user.rating} ({user.reviewCount} avis)
                       </div>
                     )}
+                    <div style={{ fontSize: 12, color: "#D4AF37", marginTop: 2 }}>Voir le profil →</div>
                   </div>
-                </div>
+                </a>
                 {user.bio && <p style={{ color: "#8A8A9A", fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>{user.bio}</p>}
                 {user.location && (
                   <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#8A8A9A", fontSize: 13 }}>

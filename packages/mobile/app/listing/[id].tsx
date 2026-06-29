@@ -159,13 +159,13 @@ export default function ListingScreen() {
             <>
               <View style={styles.divider} />
               <Text style={styles.sectionLabel}>Publié par</Text>
-              <View style={styles.authorCard}>
+              <TouchableOpacity style={styles.authorCard} onPress={() => u?.id && router.push(`/user/${u.id}`)}>
                 <View style={[styles.avatar, { backgroundColor: avatarColor + "33" }]}>
                   <Text style={[styles.avatarText, { color: avatarColor }]}>{u.name[0]}</Text>
                 </View>
                 <View style={styles.authorInfo}>
                   <View style={styles.authorRow}>
-                    <Text style={styles.authorName}>{u.name}</Text>
+                    <Text style={[styles.authorName, { color: COLORS.gold }]}>{u.name}</Text>
                     {u.verified && (
                       <View style={styles.verifiedChip}>
                         <Text style={styles.verifiedText}>✓ Vérifié</Text>
@@ -177,7 +177,7 @@ export default function ListingScreen() {
                   )}
                   {u.bio && <Text style={styles.bio} numberOfLines={2}>{u.bio}</Text>}
                 </View>
-              </View>
+              </TouchableOpacity>
             </>
           )}
 

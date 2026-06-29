@@ -8,10 +8,12 @@ import {
   Modal,
   TextInput,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { api } from "../lib/api";
 import { useSession, signOut } from "../lib/auth";
 import { useState } from "react";
@@ -174,6 +176,70 @@ const modal = StyleSheet.create({
   },
 });
 
+// ─── Edit Listing Modal ───
+function EditListingModal({
+  visible,
+  listing,
+  onClose,
+  onSave,
+  saving,
+}: {
+  visible: boolean;
+  listing: any;
+  onClose: () => void;
+  onSave: (data: any) => void;
+  saving: boolean;
+}) {
+  const [title, setTitle] = useState(listing?.title ?? "");
+  const [description, setDescription] = useState(listing?.description ?? "");
+  const [price, setPrice] = useState(listing?.price?.toString() ?? "");
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <View style={modal.container}>
+        <View style={modal.header}>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={modal.cancel}>Annuler</Text>
+          </TouchableOpacity>
+          <Text style={modal.title}>Modifier l'annonce</Text>
+          <TouchableOpacity onPress={() => onSave({ title, description, price: price ? Number(price) : null })} disabled={saving}>
+            <Text style={[modal.save, saving && { opacity: 0.5 }]}>{saving ? "..." : "Sauvegarder"}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={modal.goldLine} />
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={modal.body}>
+          <Text style={modal.label}>Titre</Text>
+          <TextInput
+            style={modal.input}
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Titre de l'annonce"
+            placeholderTextColor={COLORS.muted}
+          />
+          <Text style={modal.label}>Description</Text>
+          <TextInput
+            style={[modal.input, { height: 100, textAlignVertical: "top" }]}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Décrivez votre annonce..."
+            placeholderTextColor={COLORS.muted}
+            multiline
+          />
+          <Text style={modal.label}>Prix (€)</Text>
+          <TextInput
+            style={modal.input}
+            value={price}
+            onChangeText={setPrice}
+            placeholder="0"
+            placeholderTextColor={COLORS.muted}
+            keyboardType="numeric"
+          />
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── Main Screen ───
 export default function ProfileScreen() {
   const router = useRouter();
@@ -181,6 +247,8 @@ export default function ProfileScreen() {
   const { data: session } = useSession();
   const userId = session?.user?.id ?? "u1";
   const [editOpen, setEditOpen] = useState(false);
+  const [editListingOpen, setEditListingOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<any>(null);
 
   const { data: userData, isLoading: loadingUser } = useQuery({
     queryKey: ["user", userId],
@@ -214,6 +282,86 @@ export default function ProfileScreen() {
     onError: () => Alert.alert("Erreur", "Impossible de sauvegarder les modifications."),
   });
 
+  const updateListing = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/listings/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["listings"] });
+      setEditListingOpen(false);
+      setSelectedListing(null);
+    },
+    onError: () => Alert.alert("Erreur", "Impossible de modifier l'annonce."),
+  });
+
+  const deleteListing = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/listings/${id}`, {
+        method: "DELETE",
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["listings"] });
+    },
+    onError: () => Alert.alert("Erreur", "Impossible de supprimer l'annonce."),
+  });
+
+  const uploadAvatar = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Permission refusée", "Accès à la galerie nécessaire.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    const formData = new FormData();
+    formData.append("file", {
+      uri: asset.uri,
+      name: "avatar.jpg",
+      type: "image/jpeg",
+    } as any);
+    try {
+      const uploadRes = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+      if (uploadData.url) {
+        await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/users/${userId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatar: uploadData.url }),
+        });
+        qc.invalidateQueries({ queryKey: ["user", userId] });
+      }
+    } catch {
+      Alert.alert("Erreur", "Impossible de charger l'image.");
+    }
+  };
+
+  const handleDeleteListing = (id: string, title: string) => {
+    Alert.alert(
+      "Supprimer l'annonce",
+      `Supprimer "${title}" ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Supprimer", style: "destructive", onPress: () => deleteListing.mutate(id) },
+      ]
+    );
+  };
+
   const user = (userData as any)?.user;
   const allListings = (listingsData as any)?.listings ?? [];
   const myListings = allListings.filter((item: any) => item.listing?.userId === userId);
@@ -238,6 +386,15 @@ export default function ProfileScreen() {
         onSave={(data) => updateUser.mutate(data)}
         saving={updateUser.isPending}
       />
+      {selectedListing && (
+        <EditListingModal
+          visible={editListingOpen}
+          listing={selectedListing}
+          onClose={() => { setEditListingOpen(false); setSelectedListing(null); }}
+          onSave={(data) => updateListing.mutate({ id: selectedListing.id, data })}
+          saving={updateListing.isPending}
+        />
+      )}
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -253,11 +410,15 @@ export default function ProfileScreen() {
 
         {/* Profile card */}
         <View style={styles.profileCard}>
-          <TouchableOpacity onPress={() => setEditOpen(true)}>
+          <TouchableOpacity onPress={uploadAvatar}>
             <View style={[styles.avatar, { backgroundColor: avatarColor + "22" }]}>
-              <Text style={[styles.avatarText, { color: avatarColor }]}>
-                {user?.name?.[0] ?? "A"}
-              </Text>
+              {user?.avatar ? (
+                <Image source={{ uri: user.avatar }} style={{ width: 80, height: 80, borderRadius: 40 }} />
+              ) : (
+                <Text style={[styles.avatarText, { color: avatarColor }]}>
+                  {user?.name?.[0] ?? "A"}
+                </Text>
+              )}
               <View style={styles.editAvatarBadge}>
                 <Text style={styles.editAvatarIcon}>✎</Text>
               </View>
@@ -344,23 +505,37 @@ export default function ProfileScreen() {
               const l = item.listing;
               const catInfo = CATEGORIES[l.category];
               return (
-                <TouchableOpacity
-                  key={l.id}
-                  style={styles.listingCard}
-                  onPress={() => router.push(`/listing/${l.id}`)}
-                >
-                  <View style={styles.listingLeft}>
-                    <Text style={{ fontSize: 22 }}>{catInfo?.emoji ?? "✨"}</Text>
+                <View key={l.id} style={styles.listingCard}>
+                  <TouchableOpacity
+                    style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: 12 }}
+                    onPress={() => router.push(`/listing/${l.id}`)}
+                  >
+                    <View style={styles.listingLeft}>
+                      <Text style={{ fontSize: 22 }}>{catInfo?.emoji ?? "✨"}</Text>
+                    </View>
+                    <View style={styles.listingBody}>
+                      <Text style={styles.listingTitle} numberOfLines={1}>{l.title}</Text>
+                      <Text style={styles.listingMeta}>
+                        {catInfo?.label} · {l.type === "offer" ? "Offre" : "Recherche"}
+                        {l.price ? ` · ${l.price}€/${l.priceUnit}` : ""}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={styles.listingActions}>
+                    <TouchableOpacity
+                      style={styles.listingEditBtn}
+                      onPress={() => { setSelectedListing(l); setEditListingOpen(true); }}
+                    >
+                      <Text style={{ fontSize: 13, color: COLORS.gold }}>✎</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.listingDeleteBtn}
+                      onPress={() => handleDeleteListing(l.id, l.title)}
+                    >
+                      <Text style={{ fontSize: 13, color: "#EF4444" }}>✕</Text>
+                    </TouchableOpacity>
                   </View>
-                  <View style={styles.listingBody}>
-                    <Text style={styles.listingTitle} numberOfLines={1}>{l.title}</Text>
-                    <Text style={styles.listingMeta}>
-                      {catInfo?.label} · {l.type === "offer" ? "Offre" : "Recherche"}
-                      {l.price ? ` · ${l.price}€/${l.priceUnit}` : ""}
-                    </Text>
-                  </View>
-                  <View style={[styles.statusDot, l.status === "active" ? styles.statusActive : styles.statusPaused]} />
-                </TouchableOpacity>
+                </View>
               );
             })
           )}
@@ -377,6 +552,12 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.actionRow} onPress={() => setEditOpen(true)}>
             <Text style={styles.actionIcon}>⚙️</Text>
             <Text style={styles.actionLabel}>Modifier le profil</Text>
+            <Text style={styles.actionArrow}>›</Text>
+          </TouchableOpacity>
+          <View style={styles.actionDivider} />
+          <TouchableOpacity style={styles.actionRow} onPress={() => router.push("/qrcode")}>
+            <Text style={styles.actionIcon}>📲</Text>
+            <Text style={styles.actionLabel}>Mon QR Code</Text>
             <Text style={styles.actionArrow}>›</Text>
           </TouchableOpacity>
           <View style={styles.actionDivider} />
@@ -580,6 +761,27 @@ const styles = StyleSheet.create({
   statusDot: { width: 8, height: 8, borderRadius: 4 },
   statusActive: { backgroundColor: "#4CAF50" },
   statusPaused: { backgroundColor: COLORS.muted },
+  listingActions: { flexDirection: "row", gap: 8, alignItems: "center" },
+  listingEditBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: COLORS.goldDim,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: COLORS.gold + "44",
+  },
+  listingDeleteBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: "#EF444422",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#EF444444",
+  },
   actionRow: {
     flexDirection: "row",
     alignItems: "center",

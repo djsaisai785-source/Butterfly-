@@ -33,7 +33,7 @@
       "expo-router"
     ],
     "extra": {
-      "apiUrl": "https://butterfly-night-app.netlify.app/",
+      "apiUrl": "https://butterfly-snjg.onrender.com",
       "router": {},
       "eas": {
         "projectId": "c0b46e62-feff-4a19-acb0-ceb4f7660712"

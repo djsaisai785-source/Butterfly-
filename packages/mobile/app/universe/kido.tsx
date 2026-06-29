@@ -6,12 +6,15 @@ import {
   ScrollView,
   ActivityIndicator,
   Dimensions,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useState } from "react";
+import { useLocation } from "../../lib/LocationContext";
+import { getCategoryImage } from "../../lib/categoryImages";
 
 const { width } = Dimensions.get("window");
 
@@ -35,6 +38,7 @@ const CATEGORIES = [
   { key: "nounou", label: "🧸 Nounou" },
   { key: "sport", label: "⚽ Sport enfants" },
   { key: "atelier", label: "🎨 Ateliers créatifs" },
+  { key: "poterie", label: "🏺 Poterie & Argile" },
   { key: "spectacle", label: "🎪 Spectacles" },
   { key: "baignade", label: "🏊 Baignade" },
   { key: "indoor", label: "🏠 Indoor (pluie)" },
@@ -43,9 +47,12 @@ const CATEGORIES = [
 
 function ListingCard({ item }: { item: any }) {
   const router = useRouter();
-  const catEmoji =
-    CATEGORIES.find((c) => c.key === item.category)?.label?.split(" ")[0] ||
-    "🎈";
+  const [imgError, setImgError] = useState(false);
+
+  const photoUrl =
+    !imgError && item.photos && item.photos.length > 0
+      ? item.photos[0]
+      : getCategoryImage(item.category, item.id, "kido");
 
   return (
     <TouchableOpacity
@@ -53,51 +60,38 @@ function ListingCard({ item }: { item: any }) {
       onPress={() => router.push(`/listing/${item.id}`)}
       activeOpacity={0.85}
     >
-      <View
-        style={[
-          styles.cardHero,
-          { backgroundColor: COLORS.sky + "33" },
-        ]}
-      >
-        <Text style={styles.cardEmoji}>{catEmoji}</Text>
-      </View>
-      <View style={styles.cardBody}>
-        <View style={styles.cardHeader}>
-          <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor:
-                  item.type === "offer" ? COLORS.green + "22" : COLORS.coral + "22",
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.badgeText,
-                {
-                  color:
-                    item.type === "offer" ? COLORS.green : COLORS.coral,
-                },
-              ]}
-            >
-              {item.type === "offer" ? "✅ Propose" : "🔎 Cherche"}
-            </Text>
-          </View>
-          {item.price && (
-            <Text style={styles.price}>{item.price}€</Text>
-          )}
-        </View>
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.cardDesc} numberOfLines={2}>
-          {item.description}
-        </Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.cardMeta}>
-            📍 {item.city || "France"} · {item.category || "famille"}
+      <Image
+        source={{ uri: photoUrl }}
+        style={styles.cardImage}
+        resizeMode="cover"
+        onError={() => setImgError(true)}
+      />
+
+      {/* Badges */}
+      <View style={styles.cardBadges}>
+        <View style={[
+          styles.badge,
+          { backgroundColor: item.type === "offer" ? COLORS.green + "CC" : COLORS.coral + "CC" },
+        ]}>
+          <Text style={styles.badgeText}>
+            {item.type === "offer" ? "✅ Propose" : "🔎 Cherche"}
           </Text>
+        </View>
+        {item.price && (
+          <View style={[styles.badge, { backgroundColor: "#000000AA" }]}>
+            <Text style={[styles.badgeText, { color: COLORS.yellow }]}>{item.price}€</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Content */}
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
+        <View style={styles.cardMeta}>
+          <Text style={styles.metaText}>📍 {item.city || item.location || "France"}</Text>
+          <Text style={styles.metaDot}>·</Text>
+          <Text style={styles.metaText}>{item.category || "famille"}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -108,14 +102,20 @@ export default function KidoScreen() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("");
   const [activeType, setActiveType] = useState<"" | "offer" | "request">("");
+  const location = useLocation();
+
+  const cityFilter = location.city ?? undefined;
 
   const { data: listings, isLoading } = useQuery({
-    queryKey: ["listings", activeCategory, activeType],
+    queryKey: ["listings-kido", activeCategory, activeType, cityFilter],
     queryFn: () =>
-      api.getListings({
-        category: activeCategory || undefined,
-        type: activeType || undefined,
-      }),
+      api.listings.$get({
+        query: {
+          category: activeCategory || undefined,
+          type: activeType || undefined,
+          location: cityFilter,
+        },
+      }).then((r) => r.json()),
   });
 
   return (
@@ -127,7 +127,11 @@ export default function KidoScreen() {
         </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>🎈 KIDO</Text>
-          <Text style={styles.headerSub}>Activités & sorties famille</Text>
+          <Text style={styles.headerSub}>
+            {location.city
+              ? `📍 ${location.city} · Famille`
+              : "Activités & sorties famille"}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.postBtn}
@@ -142,7 +146,11 @@ export default function KidoScreen() {
         <Text style={styles.heroEmoji}>🌈</Text>
         <View>
           <Text style={styles.heroTitle}>Et on va où aujourd'hui ?</Text>
-          <Text style={styles.heroSub}>Trouvez des activités près de chez vous</Text>
+          <Text style={styles.heroSub}>
+            {location.city
+              ? `Activités près de ${location.city}`
+              : "Trouvez des activités près de chez vous"}
+          </Text>
         </View>
       </View>
 
@@ -185,18 +193,10 @@ export default function KidoScreen() {
         ).map((t) => (
           <TouchableOpacity
             key={t.key}
-            style={[
-              styles.typeBtn,
-              activeType === t.key && styles.typeBtnActive,
-            ]}
+            style={[styles.typeBtn, activeType === t.key && styles.typeBtnActive]}
             onPress={() => setActiveType(t.key)}
           >
-            <Text
-              style={[
-                styles.typeBtnText,
-                activeType === t.key && styles.typeBtnTextActive,
-              ]}
-            >
+            <Text style={[styles.typeBtnText, activeType === t.key && styles.typeBtnTextActive]}>
               {t.label}
             </Text>
           </TouchableOpacity>
@@ -211,22 +211,24 @@ export default function KidoScreen() {
       >
         {isLoading ? (
           <ActivityIndicator color={COLORS.sky} style={{ marginTop: 40 }} />
-        ) : listings && listings.length > 0 ? (
-          listings.map((item: any) => (
-            <ListingCard key={item.id} item={item} />
+        ) : listings && (listings as any[]).length > 0 ? (
+          (listings as any[]).map((item: any) => (
+            <ListingCard key={item.listing?.id ?? item.id} item={item.listing ?? item} />
           ))
         ) : (
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🎈</Text>
-            <Text style={styles.emptyText}>Aucune annonce pour l'instant</Text>
-            <TouchableOpacity
-              style={styles.emptyBtn}
-              onPress={() => router.push("/post")}
-            >
+            <Text style={styles.emptyText}>
+              {location.city
+                ? `Aucune activité à ${location.city} pour l'instant`
+                : "Aucune annonce pour l'instant"}
+            </Text>
+            <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push("/post")}>
               <Text style={styles.emptyBtnText}>Poster une annonce</Text>
             </TouchableOpacity>
           </View>
         )}
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -246,7 +248,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 8 },
   backArrow: { fontSize: 22, color: COLORS.text },
-  headerTitle: { fontSize: 20, fontWeight: "800", color: COLORS.text },
+  headerTitle: { fontSize: 18, fontWeight: "800", color: COLORS.text },
   headerSub: { fontSize: 11, color: COLORS.subtext },
   postBtn: {
     backgroundColor: COLORS.sky,
@@ -269,11 +271,7 @@ const styles = StyleSheet.create({
   heroTitle: { fontSize: 15, fontWeight: "700", color: COLORS.text },
   heroSub: { fontSize: 12, color: COLORS.subtext, marginTop: 2 },
   filterRow: { backgroundColor: "#FFFFFF", maxHeight: 52 },
-  filterContent: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
-  },
+  filterContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -283,10 +281,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     marginRight: 6,
   },
-  filterChipActive: {
-    backgroundColor: COLORS.sky,
-    borderColor: COLORS.sky,
-  },
+  filterChipActive: { backgroundColor: COLORS.sky, borderColor: COLORS.sky },
   filterChipText: { fontSize: 13, color: COLORS.subtext, fontWeight: "600" },
   filterChipTextActive: { color: "#FFFFFF" },
   typeRow: {
@@ -306,11 +301,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  typeBtnActive: { backgroundColor: COLORS.green, borderColor: COLORS.green },
+  typeBtnActive: { backgroundColor: COLORS.green + "33", borderColor: COLORS.green },
   typeBtnText: { fontSize: 12, color: COLORS.subtext, fontWeight: "600" },
-  typeBtnTextActive: { color: "#FFFFFF" },
+  typeBtnTextActive: { color: COLORS.green },
   list: { flex: 1 },
-  listContent: { padding: 16, gap: 14 },
+  listContent: { padding: 16, gap: 16 },
+
+  // Card with real image
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 16,
@@ -319,33 +316,39 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     shadowColor: COLORS.sky,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
   },
-  cardHero: {
-    height: 100,
-    alignItems: "center",
-    justifyContent: "center",
+  cardImage: {
+    width: "100%",
+    height: 180,
+    backgroundColor: COLORS.border,
   },
-  cardEmoji: { fontSize: 48 },
-  cardBody: { padding: 14 },
-  cardHeader: {
+  cardBadges: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    right: 12,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
   },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 11, fontWeight: "700" },
-  price: { fontSize: 16, fontWeight: "800", color: COLORS.green },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  badgeText: { fontSize: 11, color: "#fff", fontWeight: "700" },
+  cardContent: { padding: 14 },
   cardTitle: { fontSize: 15, fontWeight: "700", color: COLORS.text, marginBottom: 4 },
   cardDesc: { fontSize: 13, color: COLORS.subtext, lineHeight: 18, marginBottom: 8 },
-  cardFooter: {},
-  cardMeta: { fontSize: 12, color: COLORS.subtext },
+  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: { fontSize: 12, color: COLORS.subtext },
+  metaDot: { fontSize: 12, color: COLORS.border },
+
   empty: { alignItems: "center", paddingTop: 60, gap: 12 },
   emptyEmoji: { fontSize: 56 },
-  emptyText: { fontSize: 15, color: COLORS.subtext, fontWeight: "600" },
+  emptyText: { fontSize: 15, color: COLORS.subtext, fontWeight: "600", textAlign: "center" },
   emptyBtn: {
     backgroundColor: COLORS.sky,
     paddingHorizontal: 24,

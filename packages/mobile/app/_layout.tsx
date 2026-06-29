@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { useSession } from "../lib/auth";
 import { AutumnProvider } from "autumn-js/react";
+import { LocationProvider } from "../lib/LocationContext";
 
 const queryClient = new QueryClient();
 
@@ -47,15 +48,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AutumnProvider useBetterAuth>
-          <StatusBar style="light" />
-          <AuthGuard />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: COLORS.bg },
-              animation: "fade_from_bottom",
-            }}
-          />
+          <LocationProvider>
+            <StatusBar style="light" />
+            <AuthGuard />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: COLORS.bg },
+                animation: "fade_from_bottom",
+              }}
+            />
+          </LocationProvider>
         </AutumnProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

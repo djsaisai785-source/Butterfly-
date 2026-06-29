@@ -6,10 +6,12 @@ import {
   ScrollView,
   Modal,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { useLocation } from "../lib/LocationContext";
 
 const { width } = Dimensions.get("window");
 
@@ -67,6 +69,7 @@ const UNIVERSES = [
 export default function HomeScreen() {
   const router = useRouter();
   const [showAgeModal, setShowAgeModal] = useState(false);
+  const location = useLocation();
 
   const handleUniversePress = (universe: typeof UNIVERSES[0]) => {
     if (universe.comingSoon) return;
@@ -81,6 +84,12 @@ export default function HomeScreen() {
     setShowAgeModal(false);
     router.push("/universe/butterfly");
   };
+
+  const cityLabel = location.loading
+    ? null
+    : location.city
+    ? `📍 ${location.city}${location.region ? `, ${location.region}` : ""}`
+    : null;
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
@@ -100,6 +109,20 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.goldLine} />
+
+        {/* Location banner */}
+        {(location.loading || cityLabel) && (
+          <View style={styles.locationBanner}>
+            {location.loading ? (
+              <ActivityIndicator size="small" color={COLORS.gold} />
+            ) : (
+              <Text style={styles.locationText}>{cityLabel}</Text>
+            )}
+            {!location.loading && cityLabel && (
+              <Text style={styles.locationSub}>Annonces près de vous</Text>
+            )}
+          </View>
+        )}
 
         {/* Section title */}
         <Text style={styles.sectionTitle}>Nos univers</Text>
@@ -212,6 +235,23 @@ const styles = StyleSheet.create({
   },
   profileInitial: { color: COLORS.gold, fontWeight: "700", fontSize: 16 },
   goldLine: { height: 1, backgroundColor: COLORS.gold, marginHorizontal: 20, opacity: 0.3 },
+
+  locationBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: "#D4AF3711",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D4AF3733",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  locationText: { fontSize: 14, color: COLORS.gold, fontWeight: "700" },
+  locationSub: { fontSize: 11, color: COLORS.muted },
+
   sectionTitle: {
     fontSize: 22,
     fontWeight: "800",
